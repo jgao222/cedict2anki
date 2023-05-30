@@ -6,6 +6,10 @@ use std::{
 
 use cedict::parse_reader;
 
+use crate::pinyin::numeral_to_unicode;
+
+mod pinyin;
+
 fn main() {
     let args = env::args().skip(1).collect::<Vec<_>>(); // skips the first arg (program name)
     const NUM_ARGS: u32 = 1;
@@ -38,7 +42,11 @@ fn main() {
                 format!(
                     "{}|\"{}\n{}\"",
                     word,
-                    d.pinyin(),
+                    d.pinyin()
+                        .split_ascii_whitespace()
+                        .map(numeral_to_unicode)
+                        .collect::<Vec<String>>()
+                        .join(" "),
                     d.definitions().collect::<Vec<_>>().join(" / ")
                 )
             }
