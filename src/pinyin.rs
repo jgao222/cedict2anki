@@ -12,7 +12,11 @@ lazy_static! {
     ]);
 }
 
-/// convert a single numeric pinyin into unicode version
+/// convert a *single* numeric pinyin into unicode version
+/// ```rust
+/// let input = "xue4";
+/// assert_eq!(numeral_to_unicode(input), "xuè");
+/// ```
 pub fn numeral_to_unicode(s: &str) -> String {
     let num = if let Some(num) = s.chars().last() {
         match num.to_digit(10) {
