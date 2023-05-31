@@ -4,7 +4,9 @@ use std::{
     process::exit,
 };
 
-use cedict::parse_reader;
+use radix_trie::{self, Trie};
+
+use cedict::{parse_reader, DictEntry};
 
 use crate::pinyin::numeral_to_unicode;
 
@@ -25,6 +27,12 @@ fn main() {
             exit(1);
         }
     };
+    // build up trie's for simplified search
+    let mut simplified_trie: Trie<&str, Vec<u32>> = Trie::new();
+    for (i, d_entry) in dictionary_list.iter().enumerate() {
+        let i: u32 = i.try_into().unwrap(); // shouldn't fail unless running on lower than 32-bit system
+        simplified_trie.map_with_default(d_entry.simplified(), |l| l.push(i), vec![i]);
+    }
 
     let words = match read_to_string(args[0].clone()) {
         Ok(s) => s,
@@ -37,17 +45,24 @@ fn main() {
     // format should be one word on one line
     // println!("~"); // separator for anki? - since this isn't used in any of the definitions
     for word in words.lines() {
-        let def = match dictionary_list.iter().find(|e| e.simplified() == word) {
-            Some(d) => {
+        let def = match simplified_trie.get(word) {
+            Some(v) => {
+                let entries: Vec<&DictEntry<String>> =
+                    v.iter().map(|i| &dictionary_list[*i as usize]).collect();
+                // TODO
+                // what if multiple words w/ same simplified characters?
+                // - what if they have the same pinyin?
+                // - what if they have different pinyin?
                 format!(
                     "{}|\"{}\n{}\"",
                     word,
-                    d.pinyin()
+                    entries[0] // hardcode to just take the first entry for now
+                        .pinyin()
                         .split_ascii_whitespace()
                         .map(numeral_to_unicode)
                         .collect::<Vec<String>>()
                         .join(" "),
-                    d.definitions().collect::<Vec<_>>().join(" / ")
+                    entries[0].definitions().collect::<Vec<_>>().join(" / ")
                 )
             }
             None => format!("# Could not find definition for {}", word),
