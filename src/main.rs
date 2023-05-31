@@ -61,7 +61,7 @@ fn main() {
                         .split_ascii_whitespace()
                         .map(numeral_to_unicode)
                         .collect::<Vec<String>>()
-                        .join(" "),
+                        .join(""),
                     entries[0].definitions().collect::<Vec<_>>().join(" / ")
                 )
             }

@@ -27,7 +27,9 @@ pub fn numeral_to_unicode(s: &str) -> String {
         return s.to_owned();
     };
     let s = &s[..s.len() - 1];
-    let mut s = s.replace('v', "ü");
+    // CC-CEDICT uses u: for umlaut u, can't use v since some words possibly have
+    // v in them, so replacing all V's would result in wrong results for some stuff
+    let mut s = s.replace("u:", "ü");
     let vowel_count = count_vowels(&s);
     if vowel_count == 1 {
         let v = s.chars().rfind(|c| VOWELS.contains_key(c)).unwrap();
@@ -104,7 +106,7 @@ mod test {
 
     #[test]
     fn pinyin4() {
-        let input = "lv4";
+        let input = "lu:4";
         let expected_output = "lǜ";
         let output = numeral_to_unicode(input);
         assert_eq!(output, expected_output);
@@ -112,7 +114,7 @@ mod test {
 
     #[test]
     fn pinyin5() {
-        let input = "lve4";
+        let input = "lu:e4";
         let expected_output = "lüè";
         let output = numeral_to_unicode(input);
         assert_eq!(output, expected_output);
