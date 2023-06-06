@@ -43,6 +43,8 @@ fn main() {
         }
     };
 
+    let mut not_found = Vec::new();
+
     // format should be one word on one line
     // println!("~"); // separator for anki? - since this isn't used in any of the definitions
     for word in words.lines() {
@@ -95,7 +97,19 @@ fn main() {
             }
             None => format!("# Could not find definition for {}", word),
         };
-        println!("{def}");
+        if !def.starts_with('#') {
+            println!("{def}");
+        } else {
+            not_found.push(def);
+        }
+    }
+
+    println!(
+        "\n### Lookup complete: {} words were not found",
+        not_found.len()
+    );
+    for nf in not_found {
+        println!("{nf}");
     }
 
     exit(0);
