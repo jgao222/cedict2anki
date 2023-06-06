@@ -1,4 +1,5 @@
 use std::{
+    collections::HashMap,
     env,
     fs::{read_to_string, File},
     process::exit,
@@ -53,17 +54,44 @@ fn main() {
                 // what if multiple words w/ same simplified characters?
                 // - what if they have the same pinyin?
                 // - what if they have different pinyin?
-                format!(
-                    "{}|\"{}\n{}\"",
-                    word,
-                    entries[0] // hardcode to just take the first entry for now
-                        .pinyin()
-                        .split_ascii_whitespace()
-                        .map(numeral_to_unicode)
+                let defs_block = if entries.len() > 1 {
+                    // use a hashmap of unique pinyins to a list of multiple possible definitions
+                    // so entries with the same pinyin will have multiple elements in their lists
+                    let mut defs: HashMap<&str, Vec<String>> = HashMap::new();
+                    for dict_entry in &entries {
+                        let e = defs.entry(dict_entry.pinyin()).or_default();
+                        e.push(dict_entry.definitions().collect::<Vec<_>>().join(" / "));
+                    }
+                    // now we have a Map {pinyin -> [def, ...]}, combine into list of ["pinyin\n def\n def...", ...]
+                    defs.iter()
+                        .map(|(pinyin, def_list)| {
+                            format!(
+                                "{}\n{}",
+                                pinyin
+                                    .split_ascii_whitespace()
+                                    .map(numeral_to_unicode)
+                                    .collect::<Vec<String>>()
+                                    .join(""),
+                                def_list.join("\n")
+                            )
+                        })
                         .collect::<Vec<String>>()
-                        .join(""),
-                    entries[0].definitions().collect::<Vec<_>>().join(" / ")
-                )
+                        .join("\n\n")
+                } else {
+                    // since the other branch involves a lot of extra allocations and processing
+                    // that is unnecessary if there is only one entry, do the old case in this branch
+                    format!(
+                        "{}\n{}",
+                        entries[0] // hardcode to just take the first entry for now
+                            .pinyin()
+                            .split_ascii_whitespace()
+                            .map(numeral_to_unicode)
+                            .collect::<Vec<String>>()
+                            .join(""),
+                        entries[0].definitions().collect::<Vec<_>>().join(" / ")
+                    )
+                };
+                format!("{}|\"{}\"", word, defs_block)
             }
             None => format!("# Could not find definition for {}", word),
         };
