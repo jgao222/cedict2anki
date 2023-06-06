@@ -9,11 +9,21 @@ Prequisites: have the Rust toolchain.
 It's possible to run it directly with cargo, like `cargo run -- [input_file]` since
 performance doesn't matter that much.
 
-Otherwise, `cargo build --release`, then run `./target/release/ch-dict(.exe) [input_file]`.
+Alternatively, `cargo build --release`, then run `./target/release/ch-dict(.exe) [input_file]`.
+
+Open an issue if pre-built releases are desirable. But since the formatting is
+more or less custom for my workflow I hesitate to actually release an executable.
+
+## CC-CEDICT
+CC-CEDICT is a Creative Commons Chinese-English dictionary project from MDBG. It can
+be downloaded from [the MDBG website](https://www.mdbg.net/chinese/dictionary?page=cedict).
+
+This project includes a version of the dictionary, which is the file `cedict_ts.u8`.
+It is possible to replace this file with newer versions and it will hopefully still work.
 
 ## Usage
 Takes one command line argument - path of an input file which is just a list of
-Chinese characters separated by newlines. Currently only supports Simplified character lookup.
+Chinese characters separated by newlines. Currently only supports simplified character lookup.
 
 It outputs to the standard output, pipe into a file if desired, like
 `cargo run -- [input_file] > [output_file]`.
@@ -59,4 +69,7 @@ eighty percent / most probably / most likely"
 ```
 Note that the output looks weird since it's just how I have it set up to use
 a Basic note (front+back) and newlines to separate what should really be fields
-for pinyin and definitions.
+for pinyin and definitions. It can be directly imported by Anki from a `.txt` file,
+as long as the "Pipe" separator is selected when importing.
+
+I'm not sure what major versions of Anki support importing in this style.
