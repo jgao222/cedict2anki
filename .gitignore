@@ -3,3 +3,4 @@ test*
 tmp*
 tmp/
 ets*
+.vscode/
